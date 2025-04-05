@@ -4,11 +4,8 @@
   <img src="assets/secrethor-logo.jpg" alt="Secrethor Logo" width="300"/>
 </p>
 
-![Go Report Card](https://goreportcard.com/badge/github.com/miltlima/secrethor)
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Docker Image Size](https://img.shields.io/docker/image-size/bonovoo/secrethor/latest)
-![OperatorHub](https://img.shields.io/badge/OperatorHub-pending-blue)
-![Helm Chart](https://img.shields.io/badge/Helm-ready-blue)
+
 
 # secrethor
 
