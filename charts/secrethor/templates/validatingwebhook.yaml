@@ -1,0 +1,21 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: secrets.secrethor.dev
+webhooks:
+  - name: secrets.secrethor.dev
+    rules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["secrets"]
+        scope: "Namespaced"
+    clientConfig:
+      service:
+        name: webhook-service
+        namespace: {{ .Values.namespace }}
+        path: /validate-v1-secret
+      caBundle: ""  # Can be populated via cert-manager injection
+    admissionReviewVersions: ["v1"]
+    sideEffects: None
+    timeoutSeconds: 10

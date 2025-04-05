@@ -1,0 +1,22 @@
+image:
+  repository: docker.io/bonovoo/secrethor
+  tag: v0.1.0
+  pullPolicy: IfNotPresent
+
+namespace: secrethor-system
+
+webhook:
+  certManager:
+    issuerName: secrethor-selfsigned-issuer
+    certName: secrethor-webhook-cert
+    secretName: webhook-server-cert
+
+replicaCount: 1
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 64Mi
