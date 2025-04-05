@@ -1,0 +1,7 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: secrethor-selfsigned-issuer
+  namespace: secrethor-system
+spec:
+  selfSigned: {}

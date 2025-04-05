@@ -1,0 +1,29 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: secrets.secrethor.dev
+  annotations:
+    cert-manager.io/inject-ca-from: secrethor-system/secrethor-webhook-cert
+webhooks:
+- name: secrets.secrethor.dev
+  admissionReviewVersions: [ "v1" ]
+  sideEffects: None
+  failurePolicy: Fail
+  namespaceSelector:
+    matchExpressions:
+    - key: cert-manager.io/disable-validation
+      operator: NotIn
+      values:
+      - "true"
+  rules:
+  - operations: [ "CREATE", "UPDATE" ]
+    apiGroups: [ "" ]
+    apiVersions: [ "v1" ]
+    resources: [ "secrets" ]
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: secrethor-system
+      path: /validate-v1-secret
+      port: 443
+    caBundle: ""
