@@ -39,32 +39,35 @@ metadata:
   name: secure-policy
 spec:
   allowedNamespaces:
-    - default
-    - prod
-    - staging
+  - default
+  - prod
+  - staging
   maxAgeDays: 30
   allowedTypes:
-    - Opaque
-    - kubernetes.io/basic-auth
-    - kubernetes.io/dockerconfigjson
+  - Opaque
+  - kubernetes.io/basic-auth
+  - kubernetes.io/dockerconfigjson
+
   requiredKeys:
-    - username
-    - password
+  - username
+  - password
+
   forbiddenKeys:
-    - token
-    - privateKey
+  - token
+  - privateKey
+
   valueConstraints:
     password:
       minLength: 12
       mustContain:
-        - upper
-        - lower
-        - number
-        - special
-      regex: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>/?]).{12,}$"
+      - upper
+      - lower
+      - number
+      - special
     username:
       minLength: 4
       regex: "^[a-zA-Z0-9_.-]+$"
+
 ```
 
 ---
