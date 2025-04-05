@@ -1,0 +1,19 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: secrethor-webhook-cert
+  namespace: secrethor-system
+spec:
+  secretName: webhook-server-cert
+  duration: 8760h # 1 year
+  renewBefore: 360h # 15 days
+  subject:
+    organizations:
+    - secrethor
+  commonName: webhook-service.secrethor-system.svc
+  dnsNames:
+  - webhook-service.secrethor-system.svc
+  - webhook-service.secrethor-system.svc.cluster.local
+  issuerRef:
+    name: secrethor-selfsigned-issuer
+    kind: Issuer
