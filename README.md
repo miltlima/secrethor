@@ -9,28 +9,27 @@
 
 # Secrethor
 
-**Secrethor** is a Kubernetes Operator that manages the lifecycle of secrets across your cluster, enforcing security best practices, governance, and compliance.
+**Secrethor** is a Kubernetes Operator that enforces security best practices for secrets across your cluster.
 
-It allows you to define declarative policies to detect expired, unused (orphaned), or mislocated secrets, helping DevOps and SRE teams maintain visibility and control over sensitive assets.
+It enables teams to define `SecretPolicy` CRDs that validate how and where Kubernetes Secrets are created — ensuring governance, compliance, and operational control over sensitive credentials.
 
 ---
 
-## ✨ Features
+## Features
 
-- 🔍 Automatic discovery of all Kubernetes `Secrets`
-- ✅ Declarative `SecretPolicy` CRDs to enforce:
-  - Maximum age (`maxAgeDays`)
+- Discovery and evaluation of all Kubernetes `Secrets`
+- Admission webhook to block invalid secrets in real time
+- Declarative policies with:
   - Namespace restrictions (`allowedNamespaces`)
+  - Expiration enforcement (`maxAgeDays`)
   - Allowed Secret types (`allowedTypes`)
-  - Required and forbidden keys (`requiredKeys`, `forbiddenKeys`)
-  - Regex and content-based validation (`valueConstraints`)
-- 🧠 Built-in webhook for admission control
-- 📜 Policy violation logs for visibility
-- 📦 Built in Go using Operator SDK (extensible and maintainable)
+  - Required and forbidden keys
+  - Key content validation (`valueConstraints`)
+- Written in Go, powered by Operator SDK
 
 ---
 
-## 🔧 Example `SecretPolicy`
+## Example SecretPolicy
 
 ```yaml
 apiVersion: secrets.secrethor.dev/v1alpha1
@@ -39,31 +38,28 @@ metadata:
   name: secure-policy
 spec:
   allowedNamespaces:
-  - default
-  - prod
-  - staging
+    - default
+    - prod
+    - staging
   maxAgeDays: 30
   allowedTypes:
-  - Opaque
-  - kubernetes.io/basic-auth
-  - kubernetes.io/dockerconfigjson
-
+    - Opaque
+    - kubernetes.io/basic-auth
+    - kubernetes.io/dockerconfigjson
   requiredKeys:
-  - username
-  - password
-
+    - username
+    - password
   forbiddenKeys:
-  - token
-  - privateKey
-
+    - token
+    - privateKey
   valueConstraints:
     password:
       minLength: 12
       mustContain:
-      - upper
-      - lower
-      - number
-      - special
+        - upper
+        - lower
+        - number
+        - special
     username:
       minLength: 4
       regex: "^[a-zA-Z0-9_.-]+$"
@@ -72,7 +68,7 @@ spec:
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -84,15 +80,23 @@ spec:
 
 ---
 
-## 🔐 What is `allowedNamespaces`?
+## Installation
+
+### Install with make
+
+```bash
+make deploy IMG=docker.io/bonovoo/secrethor:latest
+```
+
+## What is `allowedNamespaces`?
 
 The `allowedNamespaces` field defines which Kubernetes namespaces are authorized to contain Secrets under your organization’s policy.
 
 ### Why use it?
 
-- 🚫 Prevents sensitive secrets from being created in non-secure namespaces
-- 🛡 Encourages security best practices and namespace segmentation
-- ✅ Helps ensure compliance with standards like PCI, SOC2, ISO, GDPR
+- Prevents sensitive secrets from being created in non-secure namespaces
+- Encourages security best practices and namespace segmentation
+- Helps ensure compliance with standards like PCI, SOC2, ISO, GDPR
 
 If a Secret is created in a namespace not listed in `allowedNamespaces`, Secrethor will deny the request.
 
@@ -119,6 +123,11 @@ Contributions are welcome!
 
 If you want to contribute new features, improve documentation, or report a bug — feel free to open an issue or submit a PR.
 
+To get started:
+	1.	Fork the repo
+	2.	Create a feature branch
+	3.	Submit a pull request
+
 ---
 
 ## 🪪 License
@@ -126,9 +135,3 @@ If you want to contribute new features, improve documentation, or report a bug �
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ---
-
-## 👤 Author
-
-**Milton Lima de Jesus**  
-DevOps / SRE Engineer  
-[linkedin.com/in/miltonlimaj](https://linkedin.com/in/miltonlimaj)
