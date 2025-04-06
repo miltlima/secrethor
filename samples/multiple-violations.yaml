@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: multiple-violations
+  namespace: default
+type: Opaque
+stringData:
+  username: "inv@lid!"
+  password: "abc123"
+  token: "should-not-exist"
+  privateKey: "topsecret"

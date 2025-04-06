@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: valid-type
+  namespace: default
+type: kubernetes.io/basic-auth
+stringData:
+  username: user
+  password: Passw0rd@123
