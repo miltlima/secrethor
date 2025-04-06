@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: bad-constraints
+  namespace: default
+type: Opaque
+stringData:
+  username: "!nv@lid#name"
+  password: short
