@@ -4,7 +4,6 @@
 
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg"/></a>
-  <a href="https://github.com/miltlima/secrethor/actions/workflows/test.yaml"><img alt="Build Status" src="https://github.com/miltlima/secrethor/actions/workflows/test.yaml/badge.svg"/></a>
 </p>
 
 # Secrethor
