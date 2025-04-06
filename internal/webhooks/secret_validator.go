@@ -96,7 +96,7 @@ Suggestion:
 		"upper":   "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
 		"lower":   "abcdefghijklmnopqrstuvwxyz",
 		"number":  "0123456789",
-		"special": "!@#$%^&*()_+-=[]{}|;':\",.<>?",
+		"special": "!@#$%^&*()_+-=[]{}|;':\",.<>",
 	}
 
 	for key, rule := range policy.Spec.ValueConstraints {
