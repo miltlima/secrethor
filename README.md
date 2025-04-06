@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/secrethor-logo.jpg" alt="Secrethor Logo" width="300"/>
+  <img src="assets/secrethor-logo.png" alt="Secrethor Logo" width="300"/>
 </p>
 
 <p align="center">
