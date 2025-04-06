@@ -5,4 +5,4 @@ kind: Kustomization
 images:
 - name: controller
   newName: docker.io/bonovoo/secrethor
-  newTag: v30
+  newTag: v36-dev
