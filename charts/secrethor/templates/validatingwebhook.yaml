@@ -15,7 +15,7 @@ webhooks:
         name: webhook-service
         namespace: {{ .Values.namespace }}
         path: /validate-v1-secret
-      caBundle: ""  # Can be populated via cert-manager injection
+      caBundle: "" 
     admissionReviewVersions: ["v1"]
     sideEffects: None
     timeoutSeconds: 10

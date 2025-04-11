@@ -1,3 +1,4 @@
+{{- if .Values.createNamespace }}
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -7,3 +8,4 @@ metadata:
     control-plane: controller-manager
     app.kubernetes.io/name: secrethor
     app.kubernetes.io/managed-by: helm
+{{- end }}
