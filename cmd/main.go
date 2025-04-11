@@ -20,6 +20,7 @@ import (
 	"crypto/tls"
 	"flag"
 	"os"
+	"time"
 
 	"github.com/miltlima/secrethor/internal/webhooks"
 
@@ -168,7 +169,6 @@ func main() {
 	}
 
 	hookServer := mgr.GetWebhookServer()
-
 	decoder := admission.NewDecoder(scheme)
 
 	validator := &webhooks.SecretValidator{
@@ -179,6 +179,28 @@ func main() {
 	hookServer.Register("/validate-v1-secret", &admission.Webhook{
 		Handler: validator,
 	})
+
+	expireChecker := &controller.SecretExpiryChecker{
+		Client:   mgr.GetClient(),
+		Recorder: mgr.GetEventRecorderFor("secrethor"),
+	}
+
+	go func() {
+		ctx := ctrl.SetupSignalHandler()
+		ticker := time.NewTicker(1 * time.Hour)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-ticker.C:
+				if err := expireChecker.CheckExpiredSecrets(ctx); err != nil {
+					setupLog.Error(err, "failed to check expired secrets")
+				}
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
 
 	setupLog.Info("starting manager")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
