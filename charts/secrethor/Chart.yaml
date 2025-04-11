@@ -1,13 +1,16 @@
 apiVersion: v2
 name: secrethor
 description: A Kubernetes Operator to enforce Secret governance policies
-version: 0.1.0
-appVersion: "0.1.0"
+
+version: 0.0.0
+appVersion: "0.0.0"
+
 keywords:
 - secrets
 - kubernetes
 - security
 - operator
+
 maintainers:
 - name: Milton Lima
   email: milton.lima@outlook.com
