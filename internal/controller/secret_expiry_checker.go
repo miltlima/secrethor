@@ -6,9 +6,9 @@ import (
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/client-go/tools/record"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/recorder"
 
 	"github.com/prometheus/client_golang/prometheus"
 
@@ -31,7 +31,7 @@ func init() {
 
 type SecretExpiryChecker struct {
 	Client   client.Client
-	Recorder recorder.EventRecorder
+	Recorder record.EventRecorder
 }
 
 func (c *SecretExpiryChecker) CheckExpiredSecrets(ctx context.Context) error {
