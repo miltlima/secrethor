@@ -1,0 +1,86 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    name: Semantic Release & Publish
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install semantic-release dependencies
+        run: npm install --no-save semantic-release @semantic-release/changelog @semantic-release/git @semantic-release/exec
+
+      - name: Run Semantic Release
+        id: semantic
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npx semantic-release > version.txt
+          echo "RELEASE_VERSION=$(cat version.txt | grep -oP '(?<=Published release ).*')" >> "$GITHUB_ENV"
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.22'
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.14.0
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build and push Docker image
+        run: |
+          docker build -t docker.io/bonovoo/secrethor:${{ env.RELEASE_VERSION }} .
+          docker push docker.io/bonovoo/secrethor:${{ env.RELEASE_VERSION }}
+
+      - name: Set Helm chart version
+        run: |
+          sed -i "s/^version:.*/version: ${{ env.RELEASE_VERSION }}/" charts/secrethor/Chart.yaml
+          sed -i "s/^appVersion:.*/appVersion: \"${{ env.RELEASE_VERSION }}\"/" charts/secrethor/Chart.yaml
+
+      - name: Package Helm chart
+        run: |
+          mkdir -p dist
+          helm package charts/secrethor --destination dist
+
+      - name: Prepare Helm chart index for GitHub Pages
+        run: |
+          mkdir -p gh-pages
+          cp dist/secrethor-${{ env.RELEASE_VERSION }}.tgz gh-pages/
+          helm repo index gh-pages --url https://github.com/${{ github.repository }}/releases/download/v${{ env.RELEASE_VERSION }}
+          touch gh-pages/.nojekyll
+
+      - name: Push Helm chart to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: gh-pages
+          publish_branch: gh-pages
+          force_orphan: true
+
+      - name: Attach artifacts to GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ env.RELEASE_VERSION }}
+          files: |
+            dist/secrethor-${{ env.RELEASE_VERSION }}.tgz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
