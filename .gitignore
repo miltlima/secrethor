@@ -5,6 +5,8 @@
 *.so
 *.dylib
 bin/*
+/dist/
+/build/
 Dockerfile.cross
 
 # Test binary, built with `go test -c`
@@ -19,9 +21,18 @@ go.work
 # Kubernetes Generated files - skip generated files, except for vendored files
 !vendor/**/zz_generated.*
 
+# Node / semantic-release / husky
+node_modules/
+npm-debug.log
+.env
+.husky/_
+
 # editor and IDE paraphernalia
 .idea
 .vscode
 *.swp
 *.swo
 *~
+
+# MacOS / OS-specific
+.DS_Store
