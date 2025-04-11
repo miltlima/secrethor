@@ -79,9 +79,18 @@ Suggestion:
 	}
 
 	// 2. Required keys
-	for _, requiredKey := range policy.Spec.RequiredKeys {
-		if _, ok := secret.Data[requiredKey]; !ok {
-			violations = append(violations, fmt.Sprintf("- Missing required key %q", requiredKey))
+	if len(policy.Spec.RequiredKeys) > 0 {
+		for key := range secret.Data {
+			allowed := false
+			for _, allowedKey := range policy.Spec.RequiredKeys {
+				if key == allowedKey {
+					allowed = true
+					break
+				}
+			}
+			if !allowed {
+				violations = append(violations, fmt.Sprintf("- None of the required keys (%s) are present in the Secret", strings.Join(policy.Spec.RequiredKeys, ", ")))
+			}
 		}
 	}
 
