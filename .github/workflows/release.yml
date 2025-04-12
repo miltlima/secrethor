@@ -34,9 +34,6 @@ jobs:
           VERSION="v$(date +%Y.%m.%d.%H%M)"  # ou use git-chglog --next-tag se preferir inferir
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-      
-      - name: Initialize git-chglog config
-        run: git-chglog init
   
       - name: Generate CHANGELOG
         run: git-chglog -o CHANGELOG.md ${{ env.VERSION }}
