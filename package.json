@@ -12,5 +12,10 @@
   "scripts": {
     "cz": "cz",
     "prepare": "husky install"
+  },
+  "name": "secrethor",
+  "repository": {
+  "type": "git",
+  "url": "https://github.com/miltlima/secrethor.git"
   }
 }
