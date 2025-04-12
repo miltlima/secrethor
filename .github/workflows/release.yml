@@ -42,7 +42,7 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git add CHANGELOG.md
-          git commit -m "docs(changelog): update CHANGELOG for ${{ env.RELEASE_VERSION }}"
+          git commit -m "docs(changelog): update CHANGELOG for ${{ env.RELEASE_VERSION }}" || echo "No changes to commit"
           git tag -a "${{ env.RELEASE_VERSION }}" -m "Release ${{ env.RELEASE_VERSION }}"
           git push origin main --tags
 
