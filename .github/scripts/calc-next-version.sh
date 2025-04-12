@@ -1,3 +1,9 @@
+# script to calculate the next version based on commit messages
+# It uses semantic versioning rules to determine if the next version should be a major, minor, or patch release
+# It also handles the case where the latest tag is not in the format vX.Y.Z
+# It assumes that the script is run in a git repository and that the latest tag is already fetched
+# It also assumes that the script is run in a GitHub Actions workflow
+
 #!/bin/bash
 set -euo pipefail
 
