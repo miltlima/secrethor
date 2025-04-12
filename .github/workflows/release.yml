@@ -13,39 +13,36 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
         with:
-          node-version: 20
-
-      - name: Install semantic-release dependencies
-        run: | 
-          npm install --no-save \
-            semantic-release \
-            @semantic-release/commit-analyzer \
-            @semantic-release/release-notes-generator \
-            @semantic-release/changelog \
-            @semantic-release/git \
-            @semantic-release/exec \
-            @semantic-release/github
-
-      - name: Run Semantic Release
-        id: semantic
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          DOCKER_USERNAME: ${{ vars.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-
-        run: |
-          npx semantic-release > version.txt
-          echo "RELEASE_VERSION=$(cat version.txt | grep -oP '(?<=Published release ).*')" >> "$GITHUB_ENV"
-
+          fetch-depth: 0
+      
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
           go-version: '1.22'
+
+      - name: Install gitchglog
+        run: |
+          curl -sfL https://raw.githubusercontent.com/git-chglog/git-chglog/main/install.sh | sh -s -- -b /usr/local/bin
+
+      - name: Generate version
+        id: version
+        run: |
+          VERSION="v$(date +%Y.%m.%d.%H%M)"  # ou use git-chglog --next-tag se preferir inferir
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+  
+      - name: Generate CHANGELOG
+        run: git-chglog -o CHANGELOG.md ${{ env.VERSION }}
+
+      - name: Commit CHANGELOG and tag
+        run: | 
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git commit -m "docs(changelog): update CHANGELOG for ${{ env.VERSION }}"
+          git tag -a "${{ env.VERSION }}" -m "Release ${{ env.VERSION }}"
+          git push origin main --tags
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -60,13 +57,13 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build -t docker.io/bonovoo/secrethor:${{ env.RELEASE_VERSION }} .
-          docker push docker.io/bonovoo/secrethor:${{ env.RELEASE_VERSION }}
+          docker build -t docker.io/bonovoo/secrethor:${{ env.VERSION }} .
+          docker push docker.io/bonovoo/secrethor:${{ env.VERSION }}
 
       - name: Set Helm chart version
         run: |
-          sed -i "s/^version:.*/version: ${{ env.RELEASE_VERSION }}/" charts/secrethor/Chart.yaml
-          sed -i "s/^appVersion:.*/appVersion: \"${{ env.RELEASE_VERSION }}\"/" charts/secrethor/Chart.yaml
+          sed -i "s/^version:.*/version: ${{ env.VERSION }}/" charts/secrethor/Chart.yaml
+          sed -i "s/^appVersion:.*/appVersion: \"${{ env.VERSION }}\"/" charts/secrethor/Chart.yaml
 
       - name: Package Helm chart
         run: |
