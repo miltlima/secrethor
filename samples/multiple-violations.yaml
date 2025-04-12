@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: multiple-violations
-  namespace: default
+  namespace: fofos
 type: Opaque
 stringData:
   username: "inv@lid!"
