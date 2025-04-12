@@ -1,43 +1,40 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
-LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-if [ "$LAST_TAG" = "v0.0.0" ]; then
-    echo "No tags found. Defaulting to v0.0.0."
+git fetch --tags
+
+latest_tag=$(git tag --sort=-v:refname | grep -E '^v?[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1 || echo "v0.0.0")
+clean_tag="${latest_tag#v}"
+
+commits=$(git log "$latest_tag"..HEAD --pretty=format:"%s%n%b")
+
+increment="patch"
+if echo "$commits" | grep -qE "^feat(\(.+\))?: "; then
+  increment="minor"
+fi
+if echo "$commits" | grep -qE "BREAKING CHANGE:"; then
+  increment="major"
 fi
 
-echo "Última tag: $LAST_TAG"
+IFS='.' read -r major minor patch <<< "$clean_tag"
 
-COMMITS=$(git log "$LAST_TAG"..HEAD --pretty=format:%s)
+case "$increment" in
+  major)
+    major=$((major + 1))
+    minor=0
+    patch=0
+    ;;
+  minor)
+    minor=$((minor + 1))
+    patch=0
+    ;;
+  patch)
+    patch=$((patch + 1))
+    ;;
+esac
 
-MAJOR=false
-MINOR=false
+next_version="v$major.$minor.$patch"
 
-while IFS= read -r COMMIT; do
-  if echo "$COMMIT" | grep -q "BREAKING CHANGE"; then
-    MAJOR=true
-    break
-  elif echo "$COMMIT" | grep -q "^feat"; then
-    MINOR=true
-  fi
-done <<< "$COMMITS"
-
-VERSION=${LAST_TAG#v}
-IFS='.' read -r MAJOR_V MINOR_V PATCH_V <<< "$VERSION"
-
-if $MAJOR; then
-  ((MAJOR_V++))
-  MINOR_V=0
-  PATCH_V=0
-elif $MINOR; then
-  ((MINOR_V++))
-  PATCH_V=0
-else
-  ((PATCH_V++))
-fi
-
-NEW_VERSION="v${MAJOR_V}.${MINOR_V}.${PATCH_V}"
-echo "Nova versão: $NEW_VERSION"
-
-echo "VERSION=$NEW_VERSION" >> "$GITHUB_ENV"
-echo "version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+echo "🔖 Próxima versão: $next_version (detected as $increment)"
+echo "RELEASE_VERSION=$next_version" >> "$GITHUB_ENV"
+echo "next_version=$next_version" >> "$GITHUB_OUTPUT"
