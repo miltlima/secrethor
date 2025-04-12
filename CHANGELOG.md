@@ -1,6 +1,11 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
 
-The format is based on [Conventional Commits](https://www.conventionalcommits.org/),
-and this project adheres to [Semantic Versioning](https://semver.org/).
+## [v1.0.0](/compare/v0.2...v1.0.0) - 2025-04-12
+
+
+## [v0.2](/compare/v0.1...v0.2) - 2025-04-06
+
+
+## v0.1 - 2025-04-05
+
