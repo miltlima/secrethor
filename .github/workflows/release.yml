@@ -59,8 +59,8 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build -t docker.io/bonovoo/secrethor:${{ env.VERSION }} .
-          docker push docker.io/bonovoo/secrethor:${{ env.VERSION }}
+          docker build -t docker.io/bonovoo/secrethor:${{ env.RELEASE_VERSION }} .
+          docker push docker.io/bonovoo/secrethor:${{ env.RELEASE_VERSION }}
 
       - name: Set Helm chart version
         run: |
