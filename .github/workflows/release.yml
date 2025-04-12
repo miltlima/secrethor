@@ -28,15 +28,13 @@ jobs:
           chmod +x git-chglog
           sudo mv git-chglog /usr/local/bin/
 
-      - name: Generate version
-        id: version
+      - name: Calculate next Semver version
         run: |
-          VERSION="v$(date +%Y.%m.%d.%H%M)"  # ou use git-chglog --next-tag se preferir inferir
-          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          chmod +x .github/scripts/calc-next-version.sh
+          ./.github/scripts/calc-next-version.sh
   
       - name: Generate CHANGELOG
-        run: git-chglog -o CHANGELOG.md ${{ env.VERSION }}
+        run: git-chglog --next-tag ${{ env.VERSION }} -o CHANGELOG.md 
 
       - name: Commit CHANGELOG and tag
         run: | 
