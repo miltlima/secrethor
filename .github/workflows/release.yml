@@ -29,20 +29,21 @@ jobs:
           sudo mv git-chglog /usr/local/bin/
 
       - name: Calculate next SemVer version
+        id: version
         run: |
           chmod +x .github/scripts/calc-next-version.sh
-          .github/scripts/calc-next-version.sh
+          sh .github/scripts/calc-next-version.sh
   
       - name: Generate CHANGELOG
-        run: git-chglog --next-tag ${{ env.VERSION }} -o CHANGELOG.md 
+        run: git-chglog -o CHANGELOG.md ${{ env.RELEASE_VERSIONV }} 
 
       - name: Commit CHANGELOG and tag
         run: | 
           git config --local user.name "github-actions[bot]"
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git add CHANGELOG.md
-          git commit -m "docs(changelog): update CHANGELOG for ${{ env.VERSION }}"
-          git tag -a "${{ env.VERSION }}" -m "Release ${{ env.VERSION }}"
+          git commit -m "docs(changelog): update CHANGELOG for ${{ env.RELEASE_VERSION }}"
+          git tag -a "${{ env.RELEASE_VERSION }}" -m "Release ${{ env.RELEASE_VERSION }}"
           git push origin main --tags
 
       - name: Set up Docker Buildx
@@ -63,8 +64,8 @@ jobs:
 
       - name: Set Helm chart version
         run: |
-          sed -i "s/^version:.*/version: ${{ env.VERSION }}/" charts/secrethor/Chart.yaml
-          sed -i "s/^appVersion:.*/appVersion: \"${{ env.VERSION }}\"/" charts/secrethor/Chart.yaml
+          sed -i "s/^version:.*/version: ${{ env.RELEASE_VERSION }}/" charts/secrethor/Chart.yaml
+          sed -i "s/^appVersion:.*/appVersion: \"${{ env.RELEASE_VERSION }}\"/" charts/secrethor/Chart.yaml
 
       - name: Package Helm chart
         run: |
@@ -75,7 +76,7 @@ jobs:
         run: |
           mkdir -p gh-pages
           cp dist/secrethor-${{ env.RELEASE_VERSION }}.tgz gh-pages/
-          helm repo index gh-pages --url https://github.com/${{ github.repository }}/releases/download/v${{ env.RELEASE_VERSION }}
+          helm repo index gh-pages --url https://github.com/${{ github.repository }}/releases/download/${{ env.RELEASE_VERSION }}
           touch gh-pages/.nojekyll
 
       - name: Push Helm chart to gh-pages branch
