@@ -32,7 +32,7 @@ jobs:
         id: version
         run: |
           chmod +x .github/scripts/calc-next-version.sh
-          sh .github/scripts/calc-next-version.sh
+          bash .github/scripts/calc-next-version.sh
   
       - name: Generate CHANGELOG
         run: git-chglog -o CHANGELOG.md ${{ env.RELEASE_VERSIONV }} 
