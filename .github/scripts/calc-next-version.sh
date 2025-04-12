@@ -2,6 +2,9 @@
 set -e
 
 LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+if [ "$LAST_TAG" = "v0.0.0" ]; then
+    echo "No tags found. Defaulting to v0.0.0."
+fi
 
 echo "Última tag: $LAST_TAG"
 

@@ -28,10 +28,10 @@ jobs:
           chmod +x git-chglog
           sudo mv git-chglog /usr/local/bin/
 
-      - name: Calculate next Semver version
+      - name: Calculate next SemVer version
         run: |
           chmod +x .github/scripts/calc-next-version.sh
-          ./.github/scripts/calc-next-version.sh
+          .github/scripts/calc-next-version.sh
   
       - name: Generate CHANGELOG
         run: git-chglog --next-tag ${{ env.VERSION }} -o CHANGELOG.md 
