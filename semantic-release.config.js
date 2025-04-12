@@ -12,7 +12,8 @@ module.exports = {
         prepareCmd: 'echo ${nextRelease.version} > version.txt',
       },
     ],
-    '@semantic-release/github'
+    ['@semantic-release/npm', false],
+    '@semantic-release/github',
   ],
   preset: 'conventionalcommits',
   tagFormat: 'v${version}',
