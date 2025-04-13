@@ -1,10 +1,10 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: {{ .Values.webhook.certManager.certName }}
+  name: {{ .Values.webhook.certName }}
   namespace: {{ .Values.namespace }}
 spec:
-  secretName: {{ .Values.webhook.certManager.secretName }}
+  secretName: {{ .Values.webhook.secretName }}
   duration: 8760h
   renewBefore: 360h
   subject:
@@ -15,5 +15,5 @@ spec:
     - webhook-service.{{ .Values.namespace }}.svc
     - webhook-service.{{ .Values.namespace }}.svc.cluster.local
   issuerRef:
-    name: {{ .Values.webhook.certManager.issuerName }}
+    name: {{ .Values.webhook.issuerName }}
     kind: Issuer
