@@ -1,7 +1,7 @@
 apiVersion: v2
 name: secrethor
 description: A Kubernetes Operator to enforce Secret governance policies
-
+type: application
 version: 0.0.0
 appVersion: "0.0.0"
 

@@ -2,9 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: controller-manager
-  namespace: {{ .Values.namespace }}
+  namespace: {{ .Release.Namespace }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       control-plane: controller-manager
@@ -14,21 +14,20 @@ spec:
         control-plane: controller-manager
     spec:
       containers:
-        - name: manager
-          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          args:
-            - "--leader-elect"
-            - "--health-probe-bind-address=:8081"
-          ports:
-            - containerPort: 9443
-              name: webhook-server
-          volumeMounts:
-            - name: cert
-              mountPath: /certs
-              readOnly: true
-      volumes:
+      - name: manager
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        args:
+        - "--leader-elect"
+        - "--health-probe-bind-address=:8081"
+        ports:
+        - containerPort: 9443
+          name: webhook-server
+        volumeMounts:
         - name: cert
-          secret:
-            secretName: {{ .Values.webhook.certManager.secretName }}
-      serviceAccountName: controller-manager
+          mountPath: /certs
+          readOnly: true
+      volumes:
+      - name: cert
+        secret:
+          secretName: {{ .Values.webhook.certManager.secretName }}
