@@ -39,8 +39,8 @@ case "$increment" in
     ;;
 esac
 
-next_version="v$major.$minor.$patch"
+next_version="$major.$minor.$patch"
 
-echo "🔖 Próxima versão: $next_version (detected as $increment)"
+echo "🔖 Próxima versão: v$next_version (detected as $increment)"
 echo "RELEASE_VERSION=$next_version" >> "$GITHUB_ENV"
 echo "next_version=$next_version" >> "$GITHUB_OUTPUT"
