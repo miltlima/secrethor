@@ -4,41 +4,78 @@
 
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg"/></a>
+  <a href="https://goreportcard.com/report/github.com/miltlima/secrethor"><img alt="Go Report Card" src="https://goreportcard.com/badge/github.com/miltlima/secrethor"/></a>
+  <a href="https://github.com/miltlima/secrethor/actions"><img alt="GitHub Actions" src="https://github.com/miltlima/secrethor/workflows/Release/badge.svg"/></a>
+  <a href="https://github.com/miltlima/secrethor/releases"><img alt="GitHub release" src="https://img.shields.io/github/release/miltlima/secrethor.svg"/></a>
+  <a href="https://github.com/miltlima/secrethor/commits/main"><img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/miltlima/secrethor.svg"/></a>
+  <a href="https://github.com/miltlima/secrethor/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/miltlima/secrethor.svg"/></a>
+  <a href="https://github.com/miltlima/secrethor/pulls"><img alt="GitHub pull requests" src="https://img.shields.io/github/issues-pr/miltlima/secrethor.svg"/></a>
+  <a href="https://github.com/miltlima/secrethor/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/miltlima/secrethor.svg"/></a>
+  <a href="https://github.com/miltlima/secrethor/network/members"><img alt="GitHub forks" src="https://img.shields.io/github/forks/miltlima/secrethor.svg"/></a>
+  <a href="https://github.com/miltlima/secrethor/security/code-scanning"><img alt="GitHub Security" src="https://img.shields.io/github/security/code-scanning/miltlima/secrethor/main"/></a>
+  <a href="https://pkg.go.dev/github.com/miltlima/secrethor"><img alt="Go Reference" src="https://pkg.go.dev/badge/github.com/miltlima/secrethor.svg"/></a>
+  <a href="https://artifacthub.io/packages/helm/secrethor/secrethor"><img alt="Artifact Hub" src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/secrethor"/></a>
 </p>
 
 # Secrethor
 
-**Secrethor** is a Kubernetes Operator that enforces security best practices for secrets across your cluster.
+**Secrethor** is a Kubernetes Operator designed to enforce and automate security best practices for secrets management across your Kubernetes clusters. It provides a robust framework for implementing security policies, ensuring compliance, and maintaining operational control over sensitive credentials.
+
+## 🚀 Key Features
+
+- **Real-time Policy Enforcement**
+  - Admission webhook for immediate validation of secret creation/updates
+  - Declarative policy definitions using Custom Resource Definitions (CRDs)
+  - Comprehensive secret validation rules
+
+- **Policy Management**
+  - Namespace-based access control (`allowedNamespaces`)
+  - Secret lifecycle management (`maxAgeDays`)
+  - Type restrictions (`allowedTypes`)
+  - Key-level validation (`requiredKeys`, `forbiddenKeys`)
+  - Advanced content validation (`valueConstraints`)
+
+- **Security & Compliance**
+  - Built-in support for common compliance frameworks
+  - Automated secret rotation capabilities
+  - Audit logging and monitoring integration
+
+## 📋 Prerequisites
+
+- Kubernetes cluster (v1.11.3+)
+- Go (v1.22.0+)
+- Docker (17.03+)
+- kubectl (v1.11.3+)
+- cert-manager (installed on cluster)
+
+## 🛠 Installation
+
+### Using Helm (Recommended)
 
 It enables teams to define `SecretPolicy` CRDs that validate how and where Kubernetes Secrets are created — ensuring governance, compliance, and operational control over sensitive credentials.
 
----
+### Manual Installation
 
-## Features
+```bash
+# Deploy the operator
+make deploy IMG=docker.io/bonovoo/secrethor:latest
 
-- Discovery and evaluation of all Kubernetes `Secrets`
-- Admission webhook to block invalid secrets in real time
-- Declarative policies with:
-  - Namespace restrictions (`allowedNamespaces`)
-  - Expiration enforcement (`maxAgeDays`)
-  - Allowed Secret types (`allowedTypes`)
-  - Required and forbidden keys
-  - Key content validation (`valueConstraints`)
-- Written in Go, powered by Operator SDK
+# Verify installation
+kubectl get pods -n secrethor-system
+```
 
----
+## 📝 Configuration
 
-## Example SecretPolicy
+### Example SecretPolicy
 
 ```yaml
 apiVersion: secrets.secrethor.dev/v1alpha1
 kind: SecretPolicy
 metadata:
-  name: secure-policy
+  name: production-policy
 spec:
   allowedNamespaces:
-    - default
-    - prod
+    - production
     - staging
   maxAgeDays: 30
   allowedTypes:
@@ -62,36 +99,31 @@ spec:
     username:
       minLength: 4
       regex: "^[a-zA-Z0-9_.-]+$"
-
 ```
 
----
+### Policy Configuration Guide
 
-## Getting Started
+#### Namespace Management
+- `allowedNamespaces`: List of namespaces where secrets can be created
+- Use cases:
+  - Prevent secrets in untrusted namespaces
+  - Enforce namespace-based access control
+  - Support multi-tenant environments
 
-### Prerequisites
+#### Secret Lifecycle
+- `maxAgeDays`: Maximum age of secrets before rotation
+- Benefits:
+  - Automated secret rotation ( to be implemented)
+  - Reduced risk of long-lived credentials
+  - Compliance with security standards
 
-- `go` version v1.22.0+
-- `docker` version 17.03+
-- `kubectl` version v1.11.3+
-- Access to a Kubernetes v1.11.3+ cluster
-- `cert-manager` installed on the cluster
-
----
-
-## Installation
-
-### Install with make
-
-```bash
-make deploy IMG=docker.io/bonovoo/secrethor:latest
-```
-
-## What is `allowedNamespaces`?
-
-The `allowedNamespaces` field defines which Kubernetes namespaces are authorized to contain Secrets under your organization’s policy.
-
-### Why use it?
+#### Content Validation
+- `valueConstraints`: Define rules for secret values
+- Supported validations:
+  - Minimum length requirements
+  - Character type requirements
+  - Custom regex patterns
+  - Forbidden patterns
 
 - Prevents sensitive secrets from being created in non-secure namespaces
 - Encourages security best practices and namespace segmentation
@@ -103,34 +135,36 @@ If a Secret is created in a namespace not listed in `allowedNamespaces`, Secreth
 
 ## 🗺 Roadmap
 
-- ✅ Webhook for policy enforcement
-- ✅ Namespace policy enforcement
-- ✅ Secret type validation
-- ✅ Key/content validation (length, pattern, etc.)
-- 🔜 Expired secrets detection
-- 🔜 Unused secret detection
-- 🔜 Secret rotation support (Vault, AWS Secrets Manager, SOPS)
-- 🔜 Prometheus metrics & Grafana dashboards
-- 🔜 Slack/MS Teams alert integration
-- 🔜 OLM/OperatorHub support via Helm Chart
+### Current Development
+- [ ] Expired secrets detection
+- [ ] Unused secret detection
+- [ ] Secret rotation automation
+- [ ] Enhanced monitoring capabilities
 
----
+### Planned Features
+- [ ] OLM/OperatorHub support
+- [ ] Additional secret store integrations
+- [ ] Advanced compliance reporting
+
 
 ## 🤝 Contributing
 
-Contributions are welcome!
+We welcome contributions from the community! Here's how you can help:
 
-If you want to contribute new features, improve documentation, or report a bug — feel free to open an issue or submit a PR.
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-To get started:
-	1.	Fork the repo
-	2.	Create a feature branch
-	3.	Submit a pull request
+Please read our [Contributing Guidelines](CONTRIBUTING.md) for more details.
 
 ---
 
 ## 🪪 License
 
-This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
+This project is licensed under the [MIT License](LICENSE).
+
+## 📞 Support
 
 ---
