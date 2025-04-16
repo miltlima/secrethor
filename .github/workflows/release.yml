@@ -59,8 +59,7 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build -t docker.io/bonovoo/secrethor:${{ env.RELEASE_VERSION }} .
-          docker push docker.io/bonovoo/secrethor:${{ env.RELEASE_VERSION }}
+          docker buildx build --platform linux/amd64,linux/arm64 -t docker.io/bonovoo/secrethor:${{ env.RELEASE_VERSION }} --push .
 
       - name: Set Helm chart version
         run: |
@@ -83,7 +82,7 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: gh-pages
+          publish_dir: gh-pages 
           publish_branch: gh-pages
           force_orphan: true
 
