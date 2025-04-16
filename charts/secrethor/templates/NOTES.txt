@@ -1,0 +1,26 @@
+Thank you for installing {{ .Chart.Name }}.
+
+Your release is named {{ .Release.Name }}.
+
+To learn more about the release, try:
+
+  $ helm status {{ .Release.Name }}
+  $ helm get all {{ .Release.Name }}
+
+To create a SecretPolicy, you can run:
+
+  $ kubectl apply -f - <<EOF
+  apiVersion: secrets.secrethor.dev/v1alpha1
+  kind: SecretPolicy
+  metadata:
+    name: example-policy
+  spec:
+    allowedNamespaces:
+      - default
+    maxAgeDays: 30
+    allowedTypes:
+      - Opaque
+  EOF
+
+For more information about Secrethor, visit:
+https://github.com/miltlima/secrethor 

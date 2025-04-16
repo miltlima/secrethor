@@ -1,21 +1,31 @@
+{{- if .Values.webhook.enabled }}
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   name: secrets.secrethor.dev
+  annotations:
+    "cert-manager.io/inject-ca-from": {{ .Values.namespace }}/{{ .Values.webhook.certManager.secretName }}
 webhooks:
-  - name: secrets.secrethor.dev
-    rules:
-      - apiGroups: [""]
-        apiVersions: ["v1"]
-        operations: ["CREATE", "UPDATE"]
-        resources: ["secrets"]
-        scope: "Namespaced"
-    clientConfig:
-      service:
-        name: webhook-service
-        namespace: {{ .Values.namespace }}
-        path: /validate-v1-secret
-      caBundle: "" 
-    admissionReviewVersions: ["v1"]
-    sideEffects: None
-    timeoutSeconds: 10
+- name: secrets.secrethor.dev
+  admissionReviewVersions: [ "v1" ]
+  sideEffects: None
+  failurePolicy: Fail
+  namespaceSelector:
+    matchExpressions:
+    - key: cert-manager.io/disable-validation
+      operator: NotIn
+      values:
+      - "true"
+  rules:
+  - operations: [ "CREATE", "UPDATE" ]
+    apiGroups: [ "" ]
+    apiVersions: [ "v1" ]
+    resources: [ "secrets" ]
+  clientConfig:
+    service:
+      name: {{ .Values.webhook.certManager.serviceName }}
+      namespace: {{ .Release.Namespace }}
+      path: /validate-v1-secret
+      port: 443
+    caBundle: ""
+{{- end }}
