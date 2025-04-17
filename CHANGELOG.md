@@ -1,6 +1,24 @@
 # Changelog
 
 
+## [v1.0.3](/compare/1.0.3...v1.0.3)
+
+
+## [1.0.3](/compare/vv1.0.2...1.0.3)
+
+### Ci
+
+* fix build and push
+
+### Docs
+
+* **changelog:** update CHANGELOG for 1.0.3
+
+### Fix
+
+* **charts:** fixing helm templates
+
+
 ## [vv1.0.2](/compare/v1.0.2...vv1.0.2)
 
 
