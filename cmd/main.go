@@ -185,8 +185,9 @@ func main() {
 		Recorder: mgr.GetEventRecorderFor("secrethor"),
 	}
 
+	ctx := ctrl.SetupSignalHandler()
+
 	go func() {
-		ctx := ctrl.SetupSignalHandler()
 		ticker := time.NewTicker(1 * time.Hour)
 		defer ticker.Stop()
 
@@ -203,9 +204,8 @@ func main() {
 	}()
 
 	setupLog.Info("starting manager")
-	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
+	if err := mgr.Start(ctx); err != nil {
 		setupLog.Error(err, "problem running manager")
 		os.Exit(1)
 	}
-
 }
