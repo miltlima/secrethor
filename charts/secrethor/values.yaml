@@ -2,11 +2,11 @@ replicaCount: 1
 
 image:
   repository: docker.io/bonovoo/secrethor
-  tag: "v1.0.2"
+  tag: "1.0.4"
   pullPolicy: IfNotPresent
 
-createNamespace: true
-namespace: secrethor-system
+namespace:
+  create: false
 
 serviceAccount:
   create: true
@@ -16,14 +16,16 @@ serviceAccount:
 rbac:
   create: true
 
-webhook:
+certManager:
   enabled: true
-  certManager:
-    serviceName: webhook-service
-    secretName: webhook-server-cert
-    issuerName: secrethor-selfsigned-issuer
-    certName: secrethor-serving-cert
-    caBundle: ""
+  serviceName: webhook-service
+  secretName: webhook-server-cert
+  issuerName: secrethor-selfsigned-issuer
+  certName: secrethor-serving-cert
+  caBundle: ""
+
+webhook:
+  enabled: false
 
 resources:
   limits:
