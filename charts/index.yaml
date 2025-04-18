@@ -1,0 +1,23 @@
+apiVersion: v1
+entries:
+  secrethor:
+  - apiVersion: v2
+    appVersion: 1.0.4
+    created: "2025-04-18T12:24:52.976912-03:00"
+    description: A Kubernetes Operator to enforce Secret governance policies
+    digest: e928a20ecbe9855def2ca47eb86bae767cc69ecd7ff12f502220f67b249d6f0b
+    keywords:
+    - secrets
+    - kubernetes
+    - security
+    - operator
+    maintainers:
+    - email: milton.lima@outlook.com
+      name: Milton Lima
+      url: https://linkedin.com/in/miltonlimaj
+    name: secrethor
+    type: application
+    urls:
+    - https://github.com/miltlima/secrethor/secrethor/secrethor-1.0.4.tgz
+    version: 1.0.4
+generated: "2025-04-18T12:24:52.975978-03:00"
