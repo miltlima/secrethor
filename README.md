@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <a href="https://opensource.org/licenses/MIT"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg"/></a>
+  <a href="https://www.apache.org/licenses/LICENSE-2.0"><img alt="License: Apache 2.0" src="https://img.shields.io/badge/License-Apache_2.0-blue.svg"/></a>
   <a href="https://goreportcard.com/report/github.com/miltlima/secrethor"><img alt="Go Report Card" src="https://goreportcard.com/badge/github.com/miltlima/secrethor"/></a>
   <a href="https://github.com/miltlima/secrethor/actions"><img alt="GitHub Actions" src="https://github.com/miltlima/secrethor/workflows/Release/badge.svg"/></a>
   <a href="https://github.com/miltlima/secrethor/releases"><img alt="GitHub release" src="https://img.shields.io/github/release/miltlima/secrethor.svg"/></a>
