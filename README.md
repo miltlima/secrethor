@@ -53,7 +53,7 @@
 
 It enables teams to define `SecretPolicy` CRDs that validate how and where Kubernetes Secrets are created — ensuring governance, compliance, and operational control over sensitive credentials.
 
-# Step 1: Install without the webhook
+#### Step 1: Install without the webhook
 
 ```bash
 helm repo add secrethor https://miltlima.github.io/secrethor 
@@ -66,27 +66,26 @@ helm install secrethor secrethor/secrethor \
   --set webhook.enabled=false
 ```
 
-# Step 2: Enable webhook once pods/services are ready
+#### Step 2: Enable webhook once pods/services are ready
 ```bash
 helm upgrade secrethor secrethor/secrethor \
   --namespace secrethor-system \
   --set webhook.enabled=true
 ```
 
-# Optional: Create namespace via Helm
+#### Optional: Create namespace via Helm
 ```yaml
 namespace:
   create: true
 ```
 
-## Uninstall 
+#### Uninstall 
 ```bash
 helm uninstall secrethor --namespace secrethor-system
 kubectl delete validatingwebhookconfiguration secrets.secrethor.dev --ignore-not-found
 ```
 
 ### Manual Installation
-
 ```bash
 # Deploy the operator
 make deploy IMG=docker.io/bonovoo/secrethor:latest
