@@ -193,6 +193,10 @@ Please read our [Contributing Guidelines](CONTRIBUTING.md) for more details.
 
 ## 🪪 License
 
-This project is licensed under the [Apache] (LICENSE).
+Apache License - see LICENSE file for details.
+
+---
+Built with ❤️ by [Milton Lima de Jesus](https://github.com/miltlima)
+
 
 
