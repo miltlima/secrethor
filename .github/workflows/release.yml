@@ -34,9 +34,7 @@ jobs:
           chmod +x .github/scripts/calc-next-version.sh
           bash .github/scripts/calc-next-version.sh
   
-      - name: Generate CHANGELOG
-        run: git-chglog -o CHANGELOG.md ${{ env.RELEASE_VERSION }} 
-
+          
       - name: Commit CHANGELOG and tag
         run: | 
           git config --local user.name "github-actions[bot]"
@@ -44,12 +42,15 @@ jobs:
           git add CHANGELOG.md
           git commit -m "docs(changelog): update CHANGELOG for ${{ env.RELEASE_VERSION }}" || echo "No changes to commit"
           if ! git rev-parse "refs/tags/${{ env.RELEASE_VERSION }}" >/dev/null 2>&1; then
-            git tag -a "${{ env.RELEASE_VERSION }}" -m "Release ${{ env.RELEASE_VERSION }}"
-            git push origin "${{ env.RELEASE_VERSION }}"
+          git tag -a "${{ env.RELEASE_VERSION }}" -m "Release ${{ env.RELEASE_VERSION }}"
+          git push origin "${{ env.RELEASE_VERSION }}"
           else
-            echo "Tag ${{ env.RELEASE_VERSION }} already exists. Skipping tag creation."
+          echo "Tag ${{ env.RELEASE_VERSION }} already exists. Skipping tag creation."
           fi
           git push origin main --tags
+          
+      - name: Generate CHANGELOG
+        run: git-chglog -o CHANGELOG.md ${{ env.RELEASE_VERSION }} 
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
