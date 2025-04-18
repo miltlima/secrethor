@@ -12,7 +12,6 @@
   <a href="https://github.com/miltlima/secrethor/pulls"><img alt="GitHub pull requests" src="https://img.shields.io/github/issues-pr/miltlima/secrethor.svg"/></a>
   <a href="https://github.com/miltlima/secrethor/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/miltlima/secrethor.svg"/></a>
   <a href="https://github.com/miltlima/secrethor/network/members"><img alt="GitHub forks" src="https://img.shields.io/github/forks/miltlima/secrethor.svg"/></a>
-  <a href="https://github.com/miltlima/secrethor/security/code-scanning"><img alt="GitHub Security" src="https://img.shields.io/github/security/code-scanning/miltlima/secrethor/main"/></a>
   <a href="https://pkg.go.dev/github.com/miltlima/secrethor"><img alt="Go Reference" src="https://pkg.go.dev/badge/github.com/miltlima/secrethor.svg"/></a>
   <a href="https://artifacthub.io/packages/helm/secrethor/secrethor"><img alt="Artifact Hub" src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/secrethor"/></a>
 </p>
@@ -53,6 +52,38 @@
 ### Using Helm (Recommended)
 
 It enables teams to define `SecretPolicy` CRDs that validate how and where Kubernetes Secrets are created — ensuring governance, compliance, and operational control over sensitive credentials.
+
+# Step 1: Install without the webhook
+
+```bash
+helm repo add secrethor https://miltlima.github.io/secrethor 
+```
+
+```bash
+helm install secrethor secrethor/secrethor \
+  --namespace secrethor-system \
+  --create-namespace \
+  --set webhook.enabled=false
+```
+
+# Step 2: Enable webhook once pods/services are ready
+```bash
+helm upgrade secrethor secrethor/secrethor \
+  --namespace secrethor-system \
+  --set webhook.enabled=true
+```
+
+# Optional: Create namespace via Helm
+```yaml
+namespace:
+  create: true
+```
+
+## Uninstall 
+```bash
+helm uninstall secrethor --namespace secrethor-system
+kubectl delete validatingwebhookconfiguration secrets.secrethor.dev --ignore-not-found
+```
 
 ### Manual Installation
 
@@ -163,8 +194,6 @@ Please read our [Contributing Guidelines](CONTRIBUTING.md) for more details.
 
 ## 🪪 License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the [Apache] (LICENSE).
 
-## 📞 Support
 
----
