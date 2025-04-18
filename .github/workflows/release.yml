@@ -35,7 +35,7 @@ jobs:
           bash .github/scripts/calc-next-version.sh
   
       - name: Generate CHANGELOG
-        run: git-chglog -o CHANGELOG.md ${{ env.RELEASE_VERSIONV }} 
+        run: git-chglog -o CHANGELOG.md ${{ env.RELEASE_VERSION }} 
 
       - name: Commit CHANGELOG and tag
         run: | 
@@ -61,10 +61,19 @@ jobs:
         run: |
           docker buildx build --platform linux/amd64,linux/arm64 -t docker.io/bonovoo/secrethor:${{ env.RELEASE_VERSION }} --push .
 
-      - name: Set Helm chart version
+      - name: Set Helm chart version and image tag valuess
         run: |
           sed -i "s/^version:.*/version: ${{ env.RELEASE_VERSION }}/" charts/secrethor/Chart.yaml
           sed -i "s/^appVersion:.*/appVersion: \"${{ env.RELEASE_VERSION }}\"/" charts/secrethor/Chart.yaml
+          sed -i "s/^  tag: .*/  tag: ${{ env.RELEASE_VERSION }}/" charts/secrethor/values.yaml
+
+      - name: Commit updated Chart.yaml, values.yaml and changelog
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add charts/secrethor/Chart.yaml charts/secrethor/values.yaml CHANGELOG.md
+          git commit -m "chore(release): update chart metadata for ${{ env.RELEASE_VERSION }}" || echo "No changes to commit"
+          git push origin main
 
       - name: Package Helm chart
         run: |
