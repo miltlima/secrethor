@@ -1,6 +1,16 @@
 # Changelog
 
 
+## [v1.0.4](/compare/1.0.4...v1.0.4)
+
+
+## [1.0.4](/compare/v1.0.3...1.0.4)
+
+### Docs
+
+* **changelog:** update CHANGELOG for 1.0.4
+
+
 ## [v1.0.3](/compare/1.0.3...v1.0.3)
 
 
