@@ -1,0 +1,17 @@
+name: secrethor
+repositoryID: ce2b3066-8555-47e6-9b19-f6ed06a21932
+description: A Kubernetes Operator for Secret validation and policy governance.
+license: Apache-2.0
+homeURL: https://github.com/miltlima/secrethor
+sources:
+- https://github.com/miltlima/secrethor
+maintainers:
+- name: Milton Lima
+  email: milton.lima@outlook.com
+  url: https://github.com/miltlima
+keywords:
+- kubernetes
+- secrets
+- operator
+- validation
+- governance
