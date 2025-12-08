@@ -20,7 +20,7 @@
 
 **Secrethor** is a Kubernetes Operator designed to enforce and automate security best practices for secrets management across your Kubernetes clusters. It provides a robust framework for implementing security policies, ensuring compliance, and maintaining operational control over sensitive credentials.
 
-## 🚀 Key Features
+## Key Features
 
 - **Real-time Policy Enforcement**
   - Admission webhook for immediate validation of secret creation/updates
@@ -39,7 +39,7 @@
   - Automated secret rotation capabilities
   - Audit logging and monitoring integration
 
-## 📋 Prerequisites
+## Prerequisites
 
 - Kubernetes cluster (v1.11.3+)
 - Go (v1.22.0+)
@@ -47,7 +47,7 @@
 - kubectl (v1.11.3+)
 - cert-manager (installed on cluster)
 
-## 🛠 Installation
+## Installation
 
 ### Using Helm (Recommended)
 
@@ -94,7 +94,7 @@ make deploy IMG=docker.io/bonovoo/secrethor:latest
 kubectl get pods -n secrethor-system
 ```
 
-## 📝 Configuration
+## Configuration
 
 ### Example SecretPolicy
 
@@ -163,7 +163,7 @@ If a Secret is created in a namespace not listed in `allowedNamespaces`, Secreth
 
 ---
 
-## 🗺 Roadmap
+## Roadmap
 
 ### Current Development
 - [ ] Expired secrets detection
@@ -191,7 +191,7 @@ Please read our [Contributing Guidelines](CONTRIBUTING.md) for more details.
 
 ---
 
-## 🪪 License
+## License
 
 Apache License - see LICENSE file for details.
 
