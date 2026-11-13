@@ -39,19 +39,16 @@ func (v *SecretValidator) Handle(ctx context.Context, req admission.Request) adm
 		return admission.Allowed("no SecretPolicy present — allowing secret by default")
 	}
 
-	var matched bool
-	var policy secrethorv1alpha1.SecretPolicy
-
+	var matched []secrethorv1alpha1.SecretPolicy
 	for _, p := range policies.Items {
 		for _, ns := range p.Spec.AllowedNamespaces {
 			if ns == targetNS {
-				matched = true
-				policy = p
+				matched = append(matched, p)
 				break
 			}
 		}
 	}
-	if !matched {
+	if len(matched) == 0 {
 		return admission.Denied(fmt.Sprintf(`
 		
 Secret rejected by Secrethor policy webhook!
@@ -63,6 +60,28 @@ Suggestion:
 `, targetNS, targetNS))
 	}
 
+	// Every policy that covers the namespace must be satisfied.
+	var violations []string
+	for _, policy := range matched {
+		violations = append(violations, policyViolations(secret, policy)...)
+	}
+
+	if len(violations) > 0 {
+		return admission.Denied(fmt.Sprintf(`
+Secret rejected by Secrethor policy webhook!
+
+The following violations were found:
+%s
+Suggestion:
+- Review the Secret content and update to comply with the policy.
+`, strings.Join(violations, "\n")))
+	}
+
+	return admission.Allowed("secret passed all policy checks")
+}
+
+// policyViolations returns the ways in which secret breaks a single policy.
+func policyViolations(secret *corev1.Secret, policy secrethorv1alpha1.SecretPolicy) []string {
 	var violations []string
 
 	if len(policy.Spec.AllowedTypes) > 0 {
@@ -78,26 +97,15 @@ Suggestion:
 		}
 	}
 
-	// 2. Required keys
-	if len(policy.Spec.RequiredKeys) > 0 {
-		for key := range secret.Data {
-			allowed := false
-			for _, allowedKey := range policy.Spec.RequiredKeys {
-				if key == allowedKey {
-					allowed = true
-					break
-				}
-			}
-			if !allowed {
-				violations = append(violations, fmt.Sprintf("- None of the required keys (%s) are present in the Secret", strings.Join(policy.Spec.RequiredKeys, ", ")))
-			}
+	for _, requiredKey := range policy.Spec.RequiredKeys {
+		if _, ok := secret.Data[requiredKey]; !ok {
+			violations = append(violations, fmt.Sprintf("- Required key %q is missing (policy: %q)", requiredKey, policy.Name))
 		}
 	}
 
-	// 3. Forbidden keys
 	for _, forbiddenKey := range policy.Spec.ForbiddenKeys {
 		if _, ok := secret.Data[forbiddenKey]; ok {
-			violations = append(violations, fmt.Sprintf("- Key %q is forbidden", forbiddenKey))
+			violations = append(violations, fmt.Sprintf("- Key %q is forbidden (policy: %q)", forbiddenKey, policy.Name))
 		}
 	}
 
@@ -135,18 +143,7 @@ Suggestion:
 		}
 	}
 
-	if len(violations) > 0 {
-		return admission.Denied(fmt.Sprintf(`
-Secret rejected by Secrethor policy webhook!
-
-The following violations were found:
-%s
-Suggestion:
-- Review the Secret content and update to comply with the policy.
-`, strings.Join(violations, "\n")))
-	}
-
-	return admission.Allowed("secret passed all policy checks")
+	return violations
 }
 
 func (v *SecretValidator) InjectClient(c client.Client) error {

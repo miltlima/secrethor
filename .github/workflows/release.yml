@@ -35,65 +35,69 @@ jobs:
           bash .github/scripts/calc-next-version.sh
   
           
-      - name: Commit CHANGELOG and tag
-        run: | 
-          git config --local user.name "github-actions[bot]"
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git add CHANGELOG.md
-          git commit -m "docs(changelog): update CHANGELOG for ${{ env.RELEASE_VERSION }}" || echo "No changes to commit"
-          if ! git rev-parse "refs/tags/${{ env.RELEASE_VERSION }}" >/dev/null 2>&1; then
-          git tag -a "${{ env.RELEASE_VERSION }}" -m "Release ${{ env.RELEASE_VERSION }}"
-          git push origin "${{ env.RELEASE_VERSION }}"
-          else
-          echo "Tag ${{ env.RELEASE_VERSION }} already exists. Skipping tag creation."
-          fi
-          git push origin main --tags
-          
       - name: Generate CHANGELOG
-        run: git-chglog -o CHANGELOG.md ${{ env.RELEASE_VERSION }} 
+        if: env.SKIP_RELEASE != 'true'
+        run: git-chglog --next-tag "${{ env.RELEASE_VERSION }}" -o CHANGELOG.md
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Set up Helm
-        uses: azure/setup-helm@v3
-        with:
-          version: v3.14.0
-
-      - name: Log in to Docker Hub
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ vars.DOCKER_USERNAME }}" --password-stdin
-
-      - name: Build and push Docker image
-        run: |
-          docker buildx build --platform linux/amd64,linux/arm64 -t docker.io/bonovoo/secrethor:${{ env.RELEASE_VERSION }} --push .
-
-      - name: Set Helm chart version and image tag valuess
+      - name: Set Helm chart version and image tag values
+        if: env.SKIP_RELEASE != 'true'
         run: |
           sed -i "s/^version:.*/version: ${{ env.RELEASE_VERSION }}/" charts/secrethor/Chart.yaml
           sed -i "s/^appVersion:.*/appVersion: \"${{ env.RELEASE_VERSION }}\"/" charts/secrethor/Chart.yaml
           sed -i "s/^  tag: .*/  tag: ${{ env.RELEASE_VERSION }}/" charts/secrethor/values.yaml
 
-      - name: Commit updated Chart.yaml, values.yaml and changelog
+      # The tag is created after this commit so that it points at the
+      # changelog and chart metadata of the version being released.
+      - name: Commit release files and tag
+        if: env.SKIP_RELEASE != 'true'
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add charts/secrethor/Chart.yaml charts/secrethor/values.yaml CHANGELOG.md
-          git commit -m "chore(release): update chart metadata for ${{ env.RELEASE_VERSION }}" || echo "No changes to commit"
-          git push origin main
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md charts/secrethor/Chart.yaml charts/secrethor/values.yaml
+          git commit -m "chore(release): ${{ env.RELEASE_VERSION }}" || echo "No changes to commit"
+          git tag -a "${{ env.RELEASE_VERSION }}" -m "Release ${{ env.RELEASE_VERSION }}"
+          git push origin main "${{ env.RELEASE_VERSION }}"
+
+      - name: Set up Docker Buildx
+        if: env.SKIP_RELEASE != 'true'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Set up Helm
+        if: env.SKIP_RELEASE != 'true'
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.14.0
+
+      - name: Log in to Docker Hub
+        if: env.SKIP_RELEASE != 'true'
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ vars.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build and push Docker image
+        if: env.SKIP_RELEASE != 'true'
+        run: |
+          docker buildx build --platform linux/amd64,linux/arm64 -t docker.io/bonovoo/secrethor:${{ env.RELEASE_VERSION }} --push .
 
       - name: Package Helm chart
+        if: env.SKIP_RELEASE != 'true'
         run: |
           mkdir -p dist
           helm package charts/secrethor --destination dist
 
       - name: Prepare Helm chart index for GitHub Pages
+        if: env.SKIP_RELEASE != 'true'
         run: |
           mkdir -p gh-pages
           cp dist/secrethor-${{ env.RELEASE_VERSION }}.tgz gh-pages/
-          helm repo index gh-pages --url https://github.com/${{ github.repository }}/releases/download/${{ env.RELEASE_VERSION }}
+          # Keep previously released chart versions in the index.
+          merge_args=()
+          if git show origin/gh-pages:index.yaml > previous-index.yaml 2>/dev/null; then
+            merge_args=(--merge previous-index.yaml)
+          fi
+          helm repo index gh-pages --url https://github.com/${{ github.repository }}/releases/download/${{ env.RELEASE_VERSION }} "${merge_args[@]}"
           touch gh-pages/.nojekyll
 
       - name: Push Helm chart to gh-pages branch
+        if: env.SKIP_RELEASE != 'true'
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -102,6 +106,7 @@ jobs:
           force_orphan: true
 
       - name: Attach artifacts to GitHub Release
+        if: env.SKIP_RELEASE != 'true'
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ env.RELEASE_VERSION }}

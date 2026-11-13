@@ -180,28 +180,16 @@ func main() {
 		Handler: validator,
 	})
 
-	expireChecker := &controller.SecretExpiryChecker{
+	if err := mgr.Add(&controller.SecretExpiryChecker{
 		Client:   mgr.GetClient(),
 		Recorder: mgr.GetEventRecorderFor("secrethor"),
+		Interval: time.Hour,
+	}); err != nil {
+		setupLog.Error(err, "unable to add secret expiry checker")
+		os.Exit(1)
 	}
 
 	ctx := ctrl.SetupSignalHandler()
-
-	go func() {
-		ticker := time.NewTicker(1 * time.Hour)
-		defer ticker.Stop()
-
-		for {
-			select {
-			case <-ticker.C:
-				if err := expireChecker.CheckExpiredSecrets(ctx); err != nil {
-					setupLog.Error(err, "failed to check expired secrets")
-				}
-			case <-ctx.Done():
-				return
-			}
-		}
-	}()
 
 	setupLog.Info("starting manager")
 	if err := mgr.Start(ctx); err != nil {
