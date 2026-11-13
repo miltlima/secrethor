@@ -42,7 +42,7 @@
 ## Prerequisites
 
 - Kubernetes cluster (v1.11.3+)
-- Go (v1.22.0+)
+- Go (v1.23.0+)
 - Docker (17.03+)
 - kubectl (v1.11.3+)
 - cert-manager (installed on cluster)

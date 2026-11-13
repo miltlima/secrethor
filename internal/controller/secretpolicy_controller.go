@@ -20,13 +20,13 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
 	secretsv1alpha1 "github.com/miltlima/secrethor/api/v1alpha1"
 )
@@ -34,7 +34,6 @@ import (
 // SecretPolicyReconciler reconciles a SecretPolicy object
 type SecretPolicyReconciler struct {
 	client.Client
-	Log    logr.Logger
 	Scheme *runtime.Scheme
 }
 
@@ -42,10 +41,11 @@ type SecretPolicyReconciler struct {
 // +kubebuilder:rbac:groups=secrets.secrethor.dev,resources=secretpolicies/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=secrets.secrethor.dev,resources=secretpolicies/finalizers,verbs=update
 
-// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch
+// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;patch
+// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
 
 func (r *SecretPolicyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	log := r.Log.WithValues("secretpolicy", req.NamespacedName)
+	log := logf.FromContext(ctx)
 
 	var policy secretsv1alpha1.SecretPolicy
 	if err := r.Get(ctx, req.NamespacedName, &policy); err != nil {
