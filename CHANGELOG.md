@@ -1,7 +1,18 @@
 # Changelog
 
 
+## [2.0.1](/compare/2.0.0...2.0.1)
+
+### Docs
+
+* **contributing:** invite contributions and describe the automatic release
+
+
 ## [2.0.0](/compare/1.1.3...2.0.0)
+
+### Chore
+
+* **release:** 2.0.0
 
 
 ## [1.1.3](/compare/1.1.2...1.1.3)
