@@ -17,7 +17,16 @@ import (
 	secrethorv1alpha1 "github.com/miltlima/secrethor/api/v1alpha1"
 )
 
+// policy builds an enforcing policy; auditPolicy builds a report-only one.
 func policy(name string, spec secrethorv1alpha1.SecretPolicySpec) *secrethorv1alpha1.SecretPolicy {
+	spec.Enforcement = secrethorv1alpha1.EnforcementEnforce
+	return &secrethorv1alpha1.SecretPolicy{
+		ObjectMeta: metav1.ObjectMeta{Name: name},
+		Spec:       spec,
+	}
+}
+
+func auditPolicy(name string, spec secrethorv1alpha1.SecretPolicySpec) *secrethorv1alpha1.SecretPolicy {
 	return &secrethorv1alpha1.SecretPolicy{
 		ObjectMeta: metav1.ObjectMeta{Name: name},
 		Spec:       spec,
@@ -106,7 +115,7 @@ func TestAllPoliciesMatchingNamespaceAreEnforced(t *testing.T) {
 	}
 }
 
-func TestNamespaceNotCoveredByAnyPolicyIsDenied(t *testing.T) {
+func TestNamespaceNotCoveredIsDeniedWhenSomePolicyEnforces(t *testing.T) {
 	p := policy("p", secrethorv1alpha1.SecretPolicySpec{AllowedNamespaces: []string{"prod"}})
 
 	resp := handle(t, secretWith("dev", map[string]string{"k": "v"}), p)
@@ -119,5 +128,69 @@ func TestNoPoliciesAllowsSecret(t *testing.T) {
 	resp := handle(t, secretWith("dev", map[string]string{"k": "v"}))
 	if !resp.Allowed {
 		t.Errorf("secret denied with no policies: %s", resp.Result.Message)
+	}
+}
+
+func TestNamespaceNotCoveredIsAllowedWhenAllPoliciesOnlyAudit(t *testing.T) {
+	p := auditPolicy("p", secrethorv1alpha1.SecretPolicySpec{AllowedNamespaces: []string{"prod"}})
+
+	resp := handle(t, secretWith("dev", map[string]string{"k": "v"}), p)
+	if !resp.Allowed {
+		t.Errorf("secret denied although no policy enforces: %s", resp.Result.Message)
+	}
+}
+
+func TestAuditPolicyAllowsViolatingSecretWithWarning(t *testing.T) {
+	p := auditPolicy("p", secrethorv1alpha1.SecretPolicySpec{
+		AllowedNamespaces: []string{"prod"},
+		ForbiddenKeys:     []string{"token"},
+	})
+
+	resp := handle(t, secretWith("prod", map[string]string{"token": "x"}), p)
+	if !resp.Allowed {
+		t.Fatalf("audit-only policy denied the secret: %s", resp.Result.Message)
+	}
+	if len(resp.Warnings) != 1 {
+		t.Errorf("warnings = %v, want one warning about the forbidden key", resp.Warnings)
+	}
+}
+
+func TestCompliantSecretGetsNoWarnings(t *testing.T) {
+	p := auditPolicy("p", secrethorv1alpha1.SecretPolicySpec{
+		AllowedNamespaces: []string{"prod"},
+		ForbiddenKeys:     []string{"token"},
+	})
+
+	resp := handle(t, secretWith("prod", map[string]string{"k": "v"}), p)
+	if !resp.Allowed || len(resp.Warnings) != 0 {
+		t.Errorf("Allowed = %v, warnings = %v, want allowed without warnings", resp.Allowed, resp.Warnings)
+	}
+}
+
+func TestEnforcingPolicyDeniesEvenWhenAnotherOnlyAudits(t *testing.T) {
+	enforcing := policy("a-enforcing", secrethorv1alpha1.SecretPolicySpec{
+		AllowedNamespaces: []string{"prod"},
+		ForbiddenKeys:     []string{"token"},
+	})
+	auditing := auditPolicy("b-auditing", secrethorv1alpha1.SecretPolicySpec{
+		AllowedNamespaces: []string{"prod"},
+		RequiredKeys:      []string{"owner"},
+	})
+
+	resp := handle(t, secretWith("prod", map[string]string{"token": "x"}), enforcing, auditing)
+	if resp.Allowed {
+		t.Error("secret breaking an enforcing policy was allowed")
+	}
+}
+
+func TestWildcardPolicyCoversEveryNamespace(t *testing.T) {
+	p := policy("p", secrethorv1alpha1.SecretPolicySpec{
+		AllowedNamespaces: []string{"*"},
+		ForbiddenKeys:     []string{"token"},
+	})
+
+	resp := handle(t, secretWith("anything", map[string]string{"token": "x"}), p)
+	if resp.Allowed {
+		t.Error("secret breaking a wildcard enforcing policy was allowed")
 	}
 }

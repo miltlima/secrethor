@@ -6,37 +6,29 @@ rules:
 - apiGroups:
   - ""
   resources:
-  - events
-  verbs:
-  - create
-  - patch
-- apiGroups:
-  - ""
-  resources:
+  - pods
   - secrets
+  - serviceaccounts
   verbs:
   - get
   - list
-  - patch
+  - watch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
   - watch
 - apiGroups:
   - secrets.secrethor.dev
   resources:
   - secretpolicies
   verbs:
-  - create
-  - delete
   - get
   - list
-  - patch
-  - update
   - watch
-- apiGroups:
-  - secrets.secrethor.dev
-  resources:
-  - secretpolicies/finalizers
-  verbs:
-  - update
 - apiGroups:
   - secrets.secrethor.dev
   resources:

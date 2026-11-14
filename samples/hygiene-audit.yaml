@@ -1,0 +1,12 @@
+# Audits every namespace without blocking anything: reports Secrets whose
+# data was not rotated in 90 days and Secrets nothing references.
+apiVersion: secrets.secrethor.dev/v1alpha1
+kind: SecretPolicy
+metadata:
+  name: hygiene
+spec:
+  enforcement: Audit
+  allowedNamespaces:
+    - "*"
+  maxAgeDays: 90
+  detectUnused: true

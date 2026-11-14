@@ -1,3 +1,4 @@
+{{- if .Values.webhook.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -21,3 +22,4 @@ spec:
     targetPort: 9443
   selector:
     control-plane: controller-manager
+{{- end }}

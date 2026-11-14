@@ -7,20 +7,33 @@ To learn more about the release, try:
   $ helm status {{ .Release.Name }}
   $ helm get all {{ .Release.Name }}
 
-To create a SecretPolicy, you can run:
+Secrethor audits Secrets and never modifies them. To audit every namespace:
 
   $ kubectl apply -f - <<EOF
   apiVersion: secrets.secrethor.dev/v1alpha1
   kind: SecretPolicy
   metadata:
-    name: example-policy
+    name: hygiene
   spec:
-    allowedNamespaces:
-      - default
-    maxAgeDays: 30
-    allowedTypes:
-      - Opaque
+    allowedNamespaces: ["*"]
+    maxAgeDays: 90
+    detectUnused: true
   EOF
+
+Then read the results:
+
+  $ kubectl get secretpolicies
+  $ kubectl get secretpolicy hygiene -o jsonpath='{range .status.findings[*]}{.reason}{"\t"}{.namespace}/{.name}{"\t"}{.message}{"\n"}{end}'
+
+{{- if .Values.webhook.enabled }}
+
+The admission webhook is enabled: policies with `enforcement: Enforce` reject
+Secrets that break them; the others only return warnings.
+{{- else }}
+
+The admission webhook is disabled, so nothing is ever blocked. Enable it with
+`--set webhook.enabled=true` (requires cert-manager).
+{{- end }}
 
 For more information about Secrethor, visit:
 https://github.com/miltlima/secrethor 
