@@ -1,10 +1,14 @@
 # Changelog
 
 
+## [2.0.0](/compare/1.1.3...2.0.0)
+
+
 ## [1.1.3](/compare/1.1.2...1.1.3)
 
 ### Chore
 
+* **release:** 1.1.3
 * **release:** update chart metadata for 1.1.2
 
 ### Fix
@@ -73,17 +77,17 @@
 ## [v1.0.4](/compare/1.0.4...v1.0.4)
 
 
-## [1.0.4](/compare/v1.0.3...1.0.4)
+## [1.0.4](/compare/1.0.3...1.0.4)
 
 ### Docs
 
 * **changelog:** update CHANGELOG for 1.0.4
 
 
-## [v1.0.3](/compare/1.0.3...v1.0.3)
+## [1.0.3](/compare/v1.0.3...1.0.3)
 
 
-## [1.0.3](/compare/vv1.0.2...1.0.3)
+## [v1.0.3](/compare/vv1.0.2...v1.0.3)
 
 ### Ci
 
