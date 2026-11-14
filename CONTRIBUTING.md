@@ -1,6 +1,8 @@
 # Contributing to Secrethor
 
-Thank you for your interest in contributing to Secrethor! This document provides guidelines and instructions for contributing to the project.
+Thank you for your interest in contributing to Secrethor! Contributions of every size are welcome: bug reports, documentation fixes, new checks, tests and ideas.
+
+Not sure where to start? The [roadmap](README.md#-roadmap) lists what we would like to build next, and opening an issue to discuss an idea is always a good first step.
 
 ## Table of Contents
 
@@ -15,7 +17,7 @@ Thank you for your interest in contributing to Secrethor! This document provides
 
 ## Code of Conduct
 
-By participating in this project, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md). Please read it before contributing.
+Be respectful and constructive. We want Secrethor to be a project where everyone feels welcome to take part.
 
 ## Getting Started
 
@@ -26,14 +28,15 @@ By participating in this project, you agree to abide by our [Code of Conduct](CO
    ```
 
 2. **Set Up Development Environment**
-   - Install Go 1.22 or later
+   - Install Go 1.23 or later
    - Install Docker
    - Install kubectl
-   - Install operator-sdk
+   - Optional: [kind](https://kind.sigs.k8s.io/) and Helm, to try your change on a local cluster
 
-3. **Install Dependencies**
+3. **Build and Run the Tests**
    ```bash
-   make install
+   make build
+   make test
    ```
 
 ## Development Workflow
@@ -70,7 +73,7 @@ By participating in this project, you agree to abide by our [Code of Conduct](CO
 
 - Follow the [Go Code Review Comments](https://github.com/golang/go/wiki/CodeReviewComments)
 - Use `gofmt` for formatting
-- Run `golint` and `go vet` before submitting PRs
+- Run `make lint` and `go vet ./...` before submitting PRs
 - Keep functions small and focused
 - Write clear and concise comments
 
@@ -87,10 +90,10 @@ By participating in this project, you agree to abide by our [Code of Conduct](CO
    ```
 
 3. **Code Coverage**
-   - Maintain at least 80% test coverage
-   - Run coverage analysis:
+   - Write the test first and watch it fail before changing the code
+   - `make test` writes the coverage profile to `cover.out`:
      ```bash
-     make coverage
+     go tool cover -func cover.out
      ```
 
 ## Documentation
@@ -102,13 +105,12 @@ By participating in this project, you agree to abide by our [Code of Conduct](CO
 
 2. **User Documentation**
    - Update README.md for significant changes
-   - Add or update examples in the docs directory
+   - Add or update examples in the `samples` directory
    - Keep API documentation up to date
 
 ## Pull Request Process
 
 1. **Create a Pull Request**
-   - Use the PR template
    - Describe your changes clearly
    - Reference related issues
 
@@ -126,30 +128,17 @@ By participating in this project, you agree to abide by our [Code of Conduct](CO
 
 ## Release Process
 
-1. **Version Bumping**
-   - Follow semantic versioning
-   - Update version in relevant files
-   - Update CHANGELOG.md
+Releases are automatic. Every push to `main` runs the release workflow, which:
 
-2. **Release Checklist**
-   - [ ] All tests pass
-   - [ ] Documentation updated
-   - [ ] Version bumped
-   - [ ] CHANGELOG.md updated
-   - [ ] Release notes prepared
+- calculates the next version from the commit messages (`fix:` and others bump the patch, `feat:` the minor, a `BREAKING CHANGE:` footer the major)
+- updates `CHANGELOG.md` and the chart version
+- creates the tag and publishes the Docker image and the Helm chart
 
-## Community
-
-- Join our [Slack channel](https://slack.secrethor.dev)
-- Participate in discussions
-- Help other contributors
-- Share your use cases
+So you never bump versions or edit the changelog by hand. What matters is the commit message: use the right type, and add a `BREAKING CHANGE:` footer when users have to change something to upgrade.
 
 ## Need Help?
 
-- Open an issue
-- Join our Slack channel
-- Check the documentation
-- Contact the maintainers
+- Open an [issue](https://github.com/miltlima/secrethor/issues)
+- Check the [README](README.md)
 
 Thank you for contributing to Secrethor! 🚀 
