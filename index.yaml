@@ -1,0 +1,62 @@
+apiVersion: v1
+entries:
+  secrethor:
+  - apiVersion: v2
+    appVersion: 2.0.0
+    created: "2026-11-14T00:59:54.785019558Z"
+    description: A Kubernetes operator that audits the hygiene of Secrets (stale,
+      unused, out of standard)
+    digest: cd856d009eef1bdfe03a63bd85afab12ab30a604bf5013a1836525ee3bf9b917
+    keywords:
+    - secrets
+    - kubernetes
+    - security
+    - operator
+    maintainers:
+    - email: milton.lima@outlook.com
+      name: Milton Lima
+      url: https://linkedin.com/in/miltonlimaj
+    name: secrethor
+    type: application
+    urls:
+    - https://github.com/miltlima/secrethor/releases/download/2.0.0/secrethor-2.0.0.tgz
+    version: 2.0.0
+  - apiVersion: v2
+    appVersion: 1.1.3
+    created: "2026-11-13T23:42:10.557015247Z"
+    description: A Kubernetes Operator to enforce Secret governance policies
+    digest: 48bfe9ca2fca9927eabfc6009ccaefdda02b74824bd5ef23a31a9cd62310f71a
+    keywords:
+    - secrets
+    - kubernetes
+    - security
+    - operator
+    maintainers:
+    - email: milton.lima@outlook.com
+      name: Milton Lima
+      url: https://linkedin.com/in/miltonlimaj
+    name: secrethor
+    type: application
+    urls:
+    - https://github.com/miltlima/secrethor/releases/download/1.1.3/secrethor-1.1.3.tgz
+    version: 1.1.3
+  - apiVersion: v2
+    appVersion: 1.1.2
+    created: "2025-12-08T19:56:08.442865129Z"
+    description: A Kubernetes Operator to enforce Secret governance policies
+    digest: 8586084230a920cefbea63c08392534d889ca94386b6e7fecdbbd09239456044
+    keywords:
+    - secrets
+    - kubernetes
+    - security
+    - operator
+    maintainers:
+    - email: milton.lima@outlook.com
+      name: Milton Lima
+      url: https://linkedin.com/in/miltonlimaj
+    name: secrethor
+    type: application
+    urls:
+    - https://github.com/miltlima/secrethor/releases/download/1.1.2/secrethor-1.1.2.tgz
+    version: 1.1.2
+generated: "2026-11-14T00:59:54.784290977Z"
