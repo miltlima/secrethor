@@ -62,7 +62,17 @@ func main() {
 	var probeAddr string
 	var secureMetrics bool
 	var enableHTTP2 bool
+	var enableWebhook bool
+	var auditInterval time.Duration
+	var maxFindings int
 	var tlsOpts []func(*tls.Config)
+	flag.BoolVar(&enableWebhook, "enable-webhook", false,
+		"Serve the admission webhook that checks Secrets against SecretPolicies. "+
+			"Without it Secrethor only audits and never blocks anything.")
+	flag.DurationVar(&auditInterval, "audit-interval", 15*time.Minute,
+		"How often the Secrets covered by each SecretPolicy are re-audited.")
+	flag.IntVar(&maxFindings, "max-findings", 100,
+		"Maximum number of findings kept in the status of each SecretPolicy.")
 	flag.StringVar(&metricsAddr, "metrics-bind-address", "0", "The address the metrics endpoint binds to. "+
 		"Use :8443 for HTTPS or :8080 for HTTP, or leave as 0 to disable the metrics service.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
@@ -96,11 +106,16 @@ func main() {
 		tlsOpts = append(tlsOpts, disableHTTP2)
 	}
 
-	webhookServer := webhook.NewServer(webhook.Options{
-		TLSOpts: tlsOpts,
-		Port:    9443,
-		CertDir: "/certs",
-	})
+	// The webhook server needs a serving certificate, so it only exists when
+	// the webhook was asked for.
+	var webhookServer webhook.Server
+	if enableWebhook {
+		webhookServer = webhook.NewServer(webhook.Options{
+			TLSOpts: tlsOpts,
+			Port:    9443,
+			CertDir: "/certs",
+		})
+	}
 
 	// Metrics endpoint is enabled in 'config/default/kustomization.yaml'. The Metrics options configure the server.
 	// More info:
@@ -151,8 +166,10 @@ func main() {
 	}
 
 	if err = (&controller.SecretPolicyReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
+		Client:      mgr.GetClient(),
+		Scheme:      mgr.GetScheme(),
+		Interval:    auditInterval,
+		MaxFindings: maxFindings,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "SecretPolicy")
 		os.Exit(1)
@@ -168,25 +185,23 @@ func main() {
 		os.Exit(1)
 	}
 
-	hookServer := mgr.GetWebhookServer()
-	decoder := admission.NewDecoder(scheme)
+	if enableWebhook {
+		validator := &webhooks.SecretValidator{
+			Client: mgr.GetClient(),
+		}
+		_ = validator.InjectDecoder(admission.NewDecoder(scheme))
 
-	validator := &webhooks.SecretValidator{
-		Client: mgr.GetClient(),
-	}
-	_ = validator.InjectDecoder(decoder)
-
-	hookServer.Register("/validate-v1-secret", &admission.Webhook{
-		Handler: validator,
-	})
-
-	if err := mgr.Add(&controller.SecretExpiryChecker{
-		Client:   mgr.GetClient(),
-		Recorder: mgr.GetEventRecorderFor("secrethor"),
-		Interval: time.Hour,
-	}); err != nil {
-		setupLog.Error(err, "unable to add secret expiry checker")
-		os.Exit(1)
+		// GetWebhookServer is what makes the manager start the server.
+		hookServer := mgr.GetWebhookServer()
+		hookServer.Register("/validate-v1-secret", &admission.Webhook{
+			Handler: validator,
+		})
+		// Not ready until the webhook answers: with failurePolicy Fail the
+		// API server depends on it.
+		if err := mgr.AddReadyzCheck("webhook", hookServer.StartedChecker()); err != nil {
+			setupLog.Error(err, "unable to set up webhook ready check")
+			os.Exit(1)
+		}
 	}
 
 	ctx := ctrl.SetupSignalHandler()

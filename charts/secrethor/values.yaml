@@ -24,8 +24,20 @@ certManager:
   certName: secrethor-serving-cert
   caBundle: ""
 
+# Auditing is always on and never writes to Secrets.
+audit:
+  # How often the Secrets covered by each SecretPolicy are re-audited.
+  interval: 15m
+  # Maximum number of findings kept in the status of each SecretPolicy.
+  maxFindings: 100
+
+# The admission webhook is optional. It is only needed for policies with
+# `enforcement: Enforce` and for admission warnings; it requires cert-manager.
 webhook:
   enabled: false
+  # Fail rejects every Secret write while the webhook is unreachable; Ignore
+  # lets them through unchecked.
+  failurePolicy: Fail
 
 resources:
   limits:

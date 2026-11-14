@@ -37,8 +37,7 @@ var _ = Describe("SecretPolicy Controller", func() {
 		ctx := context.Background()
 
 		typeNamespacedName := types.NamespacedName{
-			Name:      resourceName,
-			Namespace: "default", // TODO(user):Modify as needed
+			Name: resourceName, // SecretPolicy is cluster-scoped
 		}
 		secretpolicy := &secretsv1alpha1.SecretPolicy{}
 
@@ -48,10 +47,12 @@ var _ = Describe("SecretPolicy Controller", func() {
 			if err != nil && errors.IsNotFound(err) {
 				resource := &secretsv1alpha1.SecretPolicy{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      resourceName,
-						Namespace: "default",
+						Name: resourceName,
 					},
-					// TODO(user): Specify other spec details if needed.
+					Spec: secretsv1alpha1.SecretPolicySpec{
+						AllowedNamespaces: []string{secretsv1alpha1.AllNamespaces},
+						DetectUnused:      true,
+					},
 				}
 				Expect(k8sClient.Create(ctx, resource)).To(Succeed())
 			}
@@ -77,8 +78,12 @@ var _ = Describe("SecretPolicy Controller", func() {
 				NamespacedName: typeNamespacedName,
 			})
 			Expect(err).NotTo(HaveOccurred())
-			// TODO(user): Add more specific assertions depending on your controller's reconciliation logic.
-			// Example: If you expect a certain status condition after reconciliation, verify it here.
+
+			By("Recording the audit in the status accepted by the real API server")
+			audited := &secretsv1alpha1.SecretPolicy{}
+			Expect(k8sClient.Get(ctx, typeNamespacedName, audited)).To(Succeed())
+			Expect(audited.Status.LastAuditTime).NotTo(BeNil())
+			Expect(audited.Spec.Enforcement).To(Equal(secretsv1alpha1.EnforcementAudit))
 		})
 	})
 })

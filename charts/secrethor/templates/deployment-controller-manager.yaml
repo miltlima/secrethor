@@ -28,6 +28,11 @@ spec:
         - --metrics-bind-address=:8443
         - --leader-elect
         - --health-probe-bind-address=:8081
+        - --audit-interval={{ .Values.audit.interval }}
+        - --max-findings={{ .Values.audit.maxFindings }}
+        {{- if .Values.webhook.enabled }}
+        - --enable-webhook
+        {{- end }}
         command:
         - /manager
         image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
@@ -39,10 +44,12 @@ spec:
           initialDelaySeconds: 15
           periodSeconds: 20
         name: manager
+        {{- if .Values.webhook.enabled }}
         ports:
         - containerPort: 9443
           name: webhook-server
           protocol: TCP
+        {{- end }}
         readinessProbe:
           httpGet:
             path: /readyz
@@ -56,14 +63,18 @@ spec:
           capabilities:
             drop:
             - ALL
+        {{- if .Values.webhook.enabled }}
         volumeMounts:
         - mountPath: /certs
           name: cert
+        {{- end }}
       securityContext:
         runAsNonRoot: true
       serviceAccountName: controller-manager
       terminationGracePeriodSeconds: 10
+      {{- if .Values.webhook.enabled }}
       volumes:
       - name: cert
         secret:
-          secretName: webhook-server-cert
+          secretName: {{ .Values.certManager.secretName }}
+      {{- end }}
